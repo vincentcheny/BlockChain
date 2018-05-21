@@ -40,18 +40,17 @@ public class TxHandler {
             //根据input中存储的 上一笔交易的哈希值 在UTXOPool 中找到对应的output
             UTXO u = new UTXO(inputs.get(i).prevTxHash, inputs.get(i).outputIndex);
             Transaction.Output output = utxoPool.getTxOutput(u);
-
+            //1
             if(output==null){return false;}
-            //5
+            //2
             if(!Crypto.verifySignature(output.address,
                     tx.getRawDataToSign(i),
                     inputs.get(i).signature)){
                 return false;
             }
-            //2
+            //3
             if(utxoUsed.contains(u))return false;
             utxoUsed.add(u);
-
             sumInput += output.value;
         }
 
@@ -64,9 +63,7 @@ public class TxHandler {
             if(outputs.get(i).value<0)return false;
             sumOutput += outputs.get(i).value;
         }
-
-
-        //6
+        //5
         if(sumInput < sumOutput){return false;}
 
         return true;
