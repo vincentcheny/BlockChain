@@ -29,15 +29,15 @@ public class TxHandler {
         // IMPLEMENT THIS
         ArrayList<Transaction.Input> inputs = tx.getInputs();
         ArrayList<Transaction.Output> outputs = tx.getOutputs();
-        //2-存储已经使用过的utxo，避免双发花问题.
+        // Store the used utxo, avoid "double-spending"
         ArrayList<UTXO> utxoUsed = new ArrayList<UTXO>();
 
         double sumOutput = 0;
         double sumInput = 0;
 
-        //遍历交易中的input实现签名的逐一校验
+        // Traverse the inputs in transaction, verify each signature
         for (int i = 0; i < inputs.size() ; i++){
-            //根据input中存储的 上一笔交易的哈希值 在UTXOPool 中找到对应的output
+            //Find the output in UTXOPool based on the hash of last transaction (stored in input)
             UTXO u = new UTXO(inputs.get(i).prevTxHash, inputs.get(i).outputIndex);
             Transaction.Output output = utxoPool.getTxOutput(u);
             //1
@@ -78,7 +78,7 @@ public class TxHandler {
         // IMPLEMENT THIS
         ArrayList<Transaction> txs = new ArrayList<>();
         boolean foundtx = false;
-        //1-存在互相依赖不可以单独校验一次
+        //There are dependencies so we have to verify it more than once
         do {
             foundtx = false;
             for (Transaction tx : possibleTxs) {
@@ -86,12 +86,12 @@ public class TxHandler {
                 if (isValidTx(tx)) {
                     foundtx = true;
                     txs.add(tx);
-                    // 从UTXOPool中移除已花费的 即所有input
+                    // remove the spent input from UTXOPool
                     for (Transaction.Input in : tx.getInputs()) {
                         UTXO utxo = new UTXO(in.prevTxHash, in.outputIndex);
                         utxoPool.removeUTXO(utxo);
                     }
-                    // 向UTXOPool 中添加新的utxo 即output
+                    // add the unspent output to UTXOPool
                     int idx = 0;
                     for (Transaction.Output out : tx.getOutputs()) {
                         UTXO utxo = new UTXO(tx.getHash(), idx++);
